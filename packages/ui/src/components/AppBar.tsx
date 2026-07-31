@@ -213,7 +213,6 @@ export function AppBar({
   activeProjectId,
   isSignedIn,
   isLoadingProjects,
-  onSignIn,
   onHoverStart,
   onHoverEnd,
   notificationBell,
@@ -283,14 +282,7 @@ export function AppBar({
 
   const projectSectionItems: AppBarSectionItem[] = [];
 
-  if (!isSignedIn) {
-    projectSectionItems.push({
-      key: 'kanban-cta',
-      kind: 'kanban-cta',
-      label: t('appBar.kanban.tooltip'),
-      onSignIn,
-    });
-  }
+  // Fork: cloud kanban sign-in CTA removed (local-only build)
 
   if (isLoadingProjects) {
     projectSectionItems.push({ key: 'projects-loading', kind: 'loading' });

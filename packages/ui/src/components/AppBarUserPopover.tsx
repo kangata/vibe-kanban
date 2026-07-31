@@ -2,7 +2,6 @@ import {
   BuildingsIcon,
   CheckIcon,
   GearIcon,
-  SignInIcon,
   SignOutIcon,
   UserIcon,
 } from '@phosphor-icons/react';
@@ -33,7 +32,7 @@ interface AppBarUserPopoverProps {
   onOrgSelect: (orgId: string) => void;
   onOrgSettings?: (orgId: string) => void;
   onSettings?: () => void;
-  onSignIn: () => void;
+  onSignIn?: () => void;
   onLogout: () => void;
   onAvatarError: () => void;
 }
@@ -49,7 +48,6 @@ export function AppBarUserPopover({
   onOrgSelect,
   onOrgSettings,
   onSettings,
-  onSignIn,
   onLogout,
   onAvatarError,
 }: AppBarUserPopoverProps) {
@@ -77,16 +75,10 @@ export function AppBarUserPopover({
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent side="right" align="end" className="min-w-[200px]">
-          <DropdownMenuItem icon={SignInIcon} onClick={onSignIn}>
-            {t('signIn')}
-          </DropdownMenuItem>
           {onSettings && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem icon={GearIcon} onClick={onSettings}>
-                {settingsLabel}
-              </DropdownMenuItem>
-            </>
+            <DropdownMenuItem icon={GearIcon} onClick={onSettings}>
+              {settingsLabel}
+            </DropdownMenuItem>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
