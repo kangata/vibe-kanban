@@ -15,6 +15,10 @@ pub(crate) fn detect_provider_from_url(url: &str) -> ProviderKind {
         return ProviderKind::GitHub;
     }
 
+    if url_lower.contains("gitlab.com") {
+        return ProviderKind::GitLab;
+    }
+
     // Check Azure patterns before GHE to avoid false positives
     if url_lower.contains("dev.azure.com")
         || url_lower.contains(".visualstudio.com")
@@ -28,9 +32,19 @@ pub(crate) fn detect_provider_from_url(url: &str) -> ProviderKind {
         return ProviderKind::AzureDevOps;
     }
 
+    // /-/merge_requests/ is unique to GitLab (MR web URLs)
+    if url_lower.contains("/-/merge_requests") {
+        return ProviderKind::GitLab;
+    }
+
     // GitHub Enterprise (contains "github." but not the Azure patterns above)
     if url_lower.contains("github.") {
         return ProviderKind::GitHub;
+    }
+
+    // Self-managed GitLab (e.g. gitlab.company.com)
+    if url_lower.contains("gitlab.") {
+        return ProviderKind::GitLab;
     }
 
     ProviderKind::Unknown
@@ -139,12 +153,45 @@ mod tests {
     #[test]
     fn test_unknown_provider() {
         assert_eq!(
-            detect_provider_from_url("https://gitlab.com/owner/repo"),
-            ProviderKind::Unknown
-        );
-        assert_eq!(
             detect_provider_from_url("https://bitbucket.org/owner/repo"),
             ProviderKind::Unknown
+        );
+    }
+
+    #[test]
+    fn test_gitlab_com() {
+        assert_eq!(
+            detect_provider_from_url("https://gitlab.com/owner/repo"),
+            ProviderKind::GitLab
+        );
+        assert_eq!(
+            detect_provider_from_url("git@gitlab.com:group/sub/repo.git"),
+            ProviderKind::GitLab
+        );
+    }
+
+    #[test]
+    fn test_gitlab_self_managed() {
+        assert_eq!(
+            detect_provider_from_url("https://gitlab.company.com/group/repo.git"),
+            ProviderKind::GitLab
+        );
+        assert_eq!(
+            detect_provider_from_url("git@gitlab.internal.io:group/repo.git"),
+            ProviderKind::GitLab
+        );
+    }
+
+    #[test]
+    fn test_gitlab_mr_url() {
+        assert_eq!(
+            detect_provider_from_url("https://gitlab.com/group/repo/-/merge_requests/12"),
+            ProviderKind::GitLab
+        );
+        // Self-managed host without "gitlab" in the name: MR path is still unique
+        assert_eq!(
+            detect_provider_from_url("https://code.company.com/group/repo/-/merge_requests/3"),
+            ProviderKind::GitLab
         );
     }
 
