@@ -12,6 +12,7 @@ const WORKSPACE_NAME_MAX_LEN: usize = 60;
 use super::{
     execution_process::ExecutorActionField,
     session::Session,
+    task::TaskStatus,
     workspace_repo::{RepoWithTargetBranch, WorkspaceRepo},
 };
 
@@ -51,6 +52,7 @@ pub struct Workspace {
     pub pinned: bool,
     pub name: Option<String>,
     pub worktree_deleted: bool,
+    pub status: TaskStatus,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
@@ -102,7 +104,8 @@ impl Workspace {
                           archived AS "archived!: bool",
                           pinned AS "pinned!: bool",
                           name,
-                          worktree_deleted AS "worktree_deleted!: bool"
+                          worktree_deleted AS "worktree_deleted!: bool",
+                          status AS "status!: TaskStatus"
                    FROM workspaces
                    ORDER BY created_at DESC"#
         )
@@ -204,7 +207,8 @@ impl Workspace {
                        archived          AS "archived!: bool",
                        pinned            AS "pinned!: bool",
                        name,
-                       worktree_deleted  AS "worktree_deleted!: bool"
+                       worktree_deleted  AS "worktree_deleted!: bool",
+                       status            AS "status!: TaskStatus"
                FROM    workspaces
                WHERE   id = $1"#,
             id
@@ -226,7 +230,8 @@ impl Workspace {
                        archived          AS "archived!: bool",
                        pinned            AS "pinned!: bool",
                        name,
-                       worktree_deleted  AS "worktree_deleted!: bool"
+                       worktree_deleted  AS "worktree_deleted!: bool",
+                       status            AS "status!: TaskStatus"
                FROM    workspaces
                WHERE   rowid = $1"#,
             rowid
@@ -269,7 +274,8 @@ impl Workspace {
                 w.archived as "archived!: bool",
                 w.pinned as "pinned!: bool",
                 w.name,
-                w.worktree_deleted as "worktree_deleted!: bool"
+                w.worktree_deleted as "worktree_deleted!: bool",
+                w.status as "status!: TaskStatus"
             FROM workspaces w
             LEFT JOIN sessions s ON w.id = s.workspace_id
             LEFT JOIN execution_processes ep ON s.id = ep.session_id AND ep.completed_at IS NOT NULL
@@ -317,7 +323,7 @@ impl Workspace {
             Workspace,
             r#"INSERT INTO workspaces (id, task_id, container_ref, branch, setup_completed_at, name)
                VALUES ($1, $2, $3, $4, $5, $6)
-               RETURNING id as "id!: Uuid", task_id as "task_id: Uuid", container_ref, branch, setup_completed_at as "setup_completed_at: DateTime<Utc>", created_at as "created_at!: DateTime<Utc>", updated_at as "updated_at!: DateTime<Utc>", archived as "archived!: bool", pinned as "pinned!: bool", name, worktree_deleted as "worktree_deleted!: bool""#,
+               RETURNING id as "id!: Uuid", task_id as "task_id: Uuid", container_ref, branch, setup_completed_at as "setup_completed_at: DateTime<Utc>", created_at as "created_at!: DateTime<Utc>", updated_at as "updated_at!: DateTime<Utc>", archived as "archived!: bool", pinned as "pinned!: bool", name, worktree_deleted as "worktree_deleted!: bool", status as "status!: TaskStatus""#,
             id,
             Option::<Uuid>::None,
             Option::<String>::None,
@@ -411,6 +417,7 @@ impl Workspace {
         archived: Option<bool>,
         pinned: Option<bool>,
         name: Option<&str>,
+        status: Option<TaskStatus>,
     ) -> Result<(), sqlx::Error> {
         // Convert empty string to None for name field (to store as NULL)
         let name_value = name.filter(|s| !s.is_empty());
@@ -421,12 +428,14 @@ impl Workspace {
                 archived = COALESCE($1, archived),
                 pinned = COALESCE($2, pinned),
                 name = CASE WHEN $3 THEN $4 ELSE name END,
+                status = COALESCE($5, status),
                 updated_at = datetime('now', 'subsec')
-            WHERE id = $5"#,
+            WHERE id = $6"#,
             archived,
             pinned,
             name_provided,
             name_value,
+            status,
             workspace_id
         )
         .execute(pool)
@@ -514,6 +523,7 @@ impl Workspace {
                 w.pinned AS "pinned!: bool",
                 w.name,
                 w.worktree_deleted AS "worktree_deleted!: bool",
+                w.status AS "status!: TaskStatus",
 
                 CASE WHEN EXISTS (
                     SELECT 1
@@ -556,6 +566,7 @@ impl Workspace {
                     pinned: rec.pinned,
                     name: rec.name,
                     worktree_deleted: rec.worktree_deleted,
+                    status: rec.status,
                 },
                 is_running: rec.is_running != 0,
                 is_errored: rec.is_errored != 0,
@@ -574,7 +585,7 @@ impl Workspace {
                 && let Some(prompt) = Self::get_first_user_message(pool, ws.workspace.id).await?
             {
                 let name = Self::truncate_to_name(&prompt, WORKSPACE_NAME_MAX_LEN);
-                Self::update(pool, ws.workspace.id, None, None, Some(&name)).await?;
+                Self::update(pool, ws.workspace.id, None, None, Some(&name), None).await?;
                 ws.workspace.name = Some(name);
             }
         }
@@ -608,6 +619,7 @@ impl Workspace {
                 w.pinned AS "pinned!: bool",
                 w.name,
                 w.worktree_deleted AS "worktree_deleted!: bool",
+                w.status AS "status!: TaskStatus",
 
                 CASE WHEN EXISTS (
                     SELECT 1
@@ -653,6 +665,7 @@ impl Workspace {
                 pinned: rec.pinned,
                 name: rec.name,
                 worktree_deleted: rec.worktree_deleted,
+                status: rec.status,
             },
             is_running: rec.is_running != 0,
             is_errored: rec.is_errored != 0,
@@ -662,7 +675,7 @@ impl Workspace {
             && let Some(prompt) = Self::get_first_user_message(pool, ws.workspace.id).await?
         {
             let name = Self::truncate_to_name(&prompt, WORKSPACE_NAME_MAX_LEN);
-            Self::update(pool, ws.workspace.id, None, None, Some(&name)).await?;
+            Self::update(pool, ws.workspace.id, None, None, Some(&name), None).await?;
             ws.workspace.name = Some(name);
         }
 
