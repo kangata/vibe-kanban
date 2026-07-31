@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 use uuid::Uuid;
 
-use super::{execution_process::ExecutionProcess, workspace::Workspace};
+use super::{execution_process::ExecutionProcess, task::TaskStatus, workspace::Workspace};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ContainerQuery {
@@ -49,6 +49,7 @@ pub struct UpdateWorkspace {
     pub archived: Option<bool>,
     pub pinned: Option<bool>,
     pub name: Option<String>,
+    pub status: Option<TaskStatus>,
 }
 
 #[derive(Debug, Serialize, Deserialize, TS)]

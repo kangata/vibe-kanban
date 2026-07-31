@@ -54,6 +54,7 @@ pub async fn update_workspace(
         request.archived,
         request.pinned,
         request.name.as_deref(),
+        request.status,
     )
     .await?;
     let updated = Workspace::find_by_id(pool, workspace.id)

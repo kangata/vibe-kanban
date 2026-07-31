@@ -5,6 +5,7 @@ import { workspaceSummaryKeys } from '@/shared/hooks/workspaceSummaryKeys';
 import { makeLocalApiRequest } from '@/shared/lib/localApiTransport';
 import { useHostId } from '@/shared/providers/HostIdProvider';
 import type {
+  TaskStatus,
   WorkspaceWithStatus,
   WorkspaceSummary,
   WorkspaceSummaryResponse,
@@ -33,6 +34,7 @@ export interface SidebarWorkspace {
   prStatus?: 'open' | 'merged' | 'closed' | 'unknown';
   prNumber?: number;
   prUrl?: string;
+  status: TaskStatus;
 }
 
 // Keep the old export name for backwards compatibility
@@ -81,6 +83,7 @@ function toSidebarWorkspace(
     prNumber:
       summary?.pr_number != null ? Number(summary.pr_number) : undefined,
     prUrl: summary?.pr_url ?? undefined,
+    status: ws.status,
   };
 }
 

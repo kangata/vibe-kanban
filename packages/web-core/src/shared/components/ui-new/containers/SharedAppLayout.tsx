@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { DropResult } from '@hello-pangea/dnd';
-import { Outlet, useNavigate, useParams } from '@tanstack/react-router';
+import {
+  Outlet,
+  useLocation,
+  useNavigate,
+  useParams,
+} from '@tanstack/react-router';
 import { siDiscord, siGithub } from 'simple-icons';
 import {
   XIcon,
@@ -173,6 +178,9 @@ export function SharedAppLayout() {
   );
   const isWorkspacesActive = isLocalWorkspacesDestination(currentDestination);
   const isExportActive = currentDestination?.kind === 'export';
+  const isBoardActive = useLocation({
+    select: (location) => location.pathname.startsWith('/board'),
+  });
   const showCloudShutdownBanner =
     isExportActive || (isSignedIn && isProjectDestination(currentDestination));
   const isWorkspaceSidebarPreviewEnabled =
@@ -194,6 +202,10 @@ export function SharedAppLayout() {
       setSelectedProjectId(activeProjectId);
     }
   }, [activeProjectId, setSelectedProjectId]);
+
+  const handleBoardClick = useCallback(() => {
+    void navigate({ to: '/board' });
+  }, [navigate]);
 
   const handleWorkspacesClick = useCallback(() => {
     void navigate({ to: '/workspaces' });
@@ -337,6 +349,8 @@ export function SharedAppLayout() {
               onCreateProject={handleCreateProject}
               onExportClick={handleExportClick}
               onWorkspacesClick={handleWorkspacesClick}
+              onBoardClick={handleBoardClick}
+              isBoardActive={isBoardActive}
               onHostClick={handleHostClick}
               onPairHostClick={handlePairHostClick}
               onProjectClick={handleProjectClick}
