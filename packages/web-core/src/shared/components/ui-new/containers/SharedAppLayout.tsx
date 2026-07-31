@@ -510,23 +510,8 @@ export function SharedAppLayout() {
                     weight="bold"
                   />
                   <p className="mt-3 text-sm font-medium text-high">
-                    Kanban Boards
+                    No projects yet
                   </p>
-                  <p className="mt-1 text-xs text-low">
-                    Sign in to organise your coding agents with kanban boards.
-                  </p>
-                  <div className="mt-4">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        handleSignIn();
-                        setIsDrawerOpen(false);
-                      }}
-                      className="w-full px-3 py-2 rounded-md text-sm font-medium bg-brand text-on-brand hover:bg-brand-hover cursor-pointer"
-                    >
-                      Sign in
-                    </button>
-                  </div>
                 </div>
               )}
             </div>

@@ -283,6 +283,8 @@ export function LandingPage() {
     const success = await updateAndSaveConfig({
       onboarding_acknowledged: true,
       disclaimer_acknowledged: true,
+      // Fork: no cloud sign-in step; onboarding ends here
+      remote_onboarding_acknowledged: true,
       executor_profile: {
         executor: selectedAgent,
         variant: null,
@@ -299,9 +301,9 @@ export function LandingPage() {
     if (success) {
       trackRemoteOnboardingEvent(REMOTE_ONBOARDING_EVENTS.STAGE_COMPLETED, {
         stage: 'landing',
-        destination: '/onboarding/sign-in',
+        destination: '/',
       });
-      appNavigation.goToOnboardingSignIn({
+      appNavigation.goToRoot({
         replace: true,
       });
       return;
