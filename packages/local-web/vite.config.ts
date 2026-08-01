@@ -128,6 +128,8 @@ export default defineConfig({
     ],
   },
   server: {
+    // Set VITE_HOST=0.0.0.0 to allow access from other devices on the LAN
+    host: process.env.VITE_HOST || 'localhost',
     port: parseInt(process.env.FRONTEND_PORT || '3000'),
     proxy: {
       '/api': {
