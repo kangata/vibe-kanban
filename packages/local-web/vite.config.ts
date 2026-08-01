@@ -144,6 +144,8 @@ export default defineConfig({
     open: process.env.VITE_OPEN === 'true',
     allowedHosts: [
       '.trycloudflare.com', // allow all cloudflared tunnels
+      // Extra hostnames for LAN access, comma-separated (VITE_ALLOWED_HOSTS=workspace,mydevice.local)
+      ...(process.env.VITE_ALLOWED_HOSTS?.split(',').filter(Boolean) ?? []),
     ],
   },
   optimizeDeps: {
