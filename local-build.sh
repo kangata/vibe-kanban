@@ -42,9 +42,10 @@ fi
 echo "🔍 Detected platform: $PLATFORM"
 echo "🔧 Using target directory: $CARGO_TARGET_DIR"
 
-# Set API base URL for remote features
-export VK_SHARED_API_BASE="https://api.vibekanban.com"
-export VITE_VK_SHARED_API_BASE="https://api.vibekanban.com"
+# Fork: local-only builds — Bloop's cloud is gone, so no API base is baked
+# in unless explicitly provided (keeps sign-in/cloud features disabled).
+export VK_SHARED_API_BASE="${VK_SHARED_API_BASE:-}"
+export VITE_VK_SHARED_API_BASE="${VK_SHARED_API_BASE:-}"
 
 echo "🧹 Cleaning previous builds..."
 rm -rf npx-cli/dist
