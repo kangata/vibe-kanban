@@ -6,6 +6,7 @@ import { PreviewControlsContainer } from './PreviewControlsContainer';
 import { GitPanelContainer } from './GitPanelContainer';
 import { TerminalPanelContainer } from '@/shared/components/TerminalPanelContainer';
 import { WorkspaceNotesContainer } from './WorkspaceNotesContainer';
+import { WorkspaceFileTree } from './WorkspaceFileTree';
 import { useDiffs } from '@/shared/stores/useWorkspaceDiffStore';
 import { ArrowsOutSimpleIcon } from '@phosphor-icons/react';
 import { useLogsPanel } from '@/shared/hooks/useLogsPanel';
@@ -72,11 +73,13 @@ export const RightSidebar = memo(function RightSidebar({
     PERSIST_KEYS.notesSection,
     false
   );
+  const [filesExpanded] = usePersistedExpanded(PERSIST_KEYS.filesSection, true);
 
   const hasUpperContent =
     rightMainPanelMode === RIGHT_MAIN_PANEL_MODES.CHANGES ||
     rightMainPanelMode === RIGHT_MAIN_PANEL_MODES.LOGS ||
-    rightMainPanelMode === RIGHT_MAIN_PANEL_MODES.PREVIEW;
+    rightMainPanelMode === RIGHT_MAIN_PANEL_MODES.PREVIEW ||
+    rightMainPanelMode === RIGHT_MAIN_PANEL_MODES.FILES;
 
   const upperExpanded = (() => {
     if (rightMainPanelMode === RIGHT_MAIN_PANEL_MODES.CHANGES)
@@ -85,6 +88,8 @@ export const RightSidebar = memo(function RightSidebar({
       return processesExpanded;
     if (rightMainPanelMode === RIGHT_MAIN_PANEL_MODES.PREVIEW)
       return devServerExpanded;
+    if (rightMainPanelMode === RIGHT_MAIN_PANEL_MODES.FILES)
+      return filesExpanded;
     return false;
   })();
 
@@ -168,6 +173,23 @@ export const RightSidebar = memo(function RightSidebar({
           });
         }
         break;
+      case RIGHT_MAIN_PANEL_MODES.FILES:
+        if (selectedWorkspace) {
+          result.unshift({
+            title: 'Files',
+            persistKey: PERSIST_KEYS.filesSection,
+            visible: hasUpperContent,
+            expanded: upperExpanded,
+            content: (
+              <WorkspaceFileTree
+                key={selectedWorkspace.id}
+                workspaceId={selectedWorkspace.id}
+              />
+            ),
+            actions: [],
+          });
+        }
+        break;
       case null:
         break;
     }
@@ -184,6 +206,7 @@ export const RightSidebar = memo(function RightSidebar({
     changesExpanded,
     processesExpanded,
     devServerExpanded,
+    filesExpanded,
     isTerminalVisible,
     isTerminalExpanded,
     hasUpperContent,
