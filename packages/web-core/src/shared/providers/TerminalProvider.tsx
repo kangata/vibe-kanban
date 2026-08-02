@@ -41,10 +41,12 @@ function encodeBase64(str: string): string {
   return btoa(binString);
 }
 
-function decodeBase64(base64: string): string {
+function decodeBase64(base64: string): Uint8Array {
+  // Return raw bytes: xterm.js has its own streaming UTF-8 decoder, which
+  // handles multi-byte characters split across chunk boundaries. Decoding
+  // per-chunk with a fresh TextDecoder here would corrupt them.
   const binString = atob(base64);
-  const bytes = Uint8Array.from(binString, (c) => c.codePointAt(0)!);
-  return new TextDecoder().decode(bytes);
+  return Uint8Array.from(binString, (c) => c.codePointAt(0)!);
 }
 
 function terminalReducer(
@@ -170,7 +172,14 @@ export function TerminalProvider({ children }: TerminalProviderProps) {
 
   // Store callback refs for each connection to prevent stale closures
   const connectionCallbacksRef = useRef<
-    Map<string, { onData: (data: string) => void; onExit?: () => void }>
+    Map<
+      string,
+      {
+        onData: (data: string | Uint8Array) => void;
+        onExit?: () => void;
+        onOpen?: () => void;
+      }
+    >
   >(new Map());
 
   // Store reconnection state for each connection
@@ -292,8 +301,9 @@ export function TerminalProvider({ children }: TerminalProviderProps) {
     (
       tabId: string,
       endpoint: string,
-      onData: (data: string) => void,
-      onExit?: () => void
+      onData: (data: string | Uint8Array) => void,
+      onExit?: () => void,
+      onOpen?: () => void
     ) => {
       // Close existing connection if any
       const existing = terminalConnectionsRef.current.get(tabId);
@@ -302,7 +312,7 @@ export function TerminalProvider({ children }: TerminalProviderProps) {
       }
 
       // Store callbacks in ref so they can be updated without recreating connection
-      connectionCallbacksRef.current.set(tabId, { onData, onExit });
+      connectionCallbacksRef.current.set(tabId, { onData, onExit, onOpen });
 
       // Initialize or reset reconnection state
       const existingReconnectState = reconnectStateRef.current.get(tabId);
@@ -356,6 +366,10 @@ export function TerminalProvider({ children }: TerminalProviderProps) {
               if (latestState) {
                 latestState.retryCount = 0;
               }
+              // Let the terminal sync its real size: resizes sent while the
+              // socket was still connecting were dropped, so the PTY may
+              // otherwise stay at the 80x24 default (breaks vim/TUI apps).
+              connectionCallbacksRef.current.get(tabId)?.onOpen?.();
             };
 
             ws.onmessage = (event) => {
@@ -406,6 +420,9 @@ export function TerminalProvider({ children }: TerminalProviderProps) {
 
             const connection: TerminalConnection = { ws, send, resize };
             terminalConnectionsRef.current.set(tabId, connection);
+            if (ws.readyState === WebSocket.OPEN) {
+              connectionCallbacksRef.current.get(tabId)?.onOpen?.();
+            }
           } catch {
             scheduleReconnect();
           }

@@ -90,7 +90,15 @@ export function XTermInstance({
         tabId,
         endpoint,
         (data) => terminal?.write(data),
-        onClose
+        onClose,
+        // Sync the PTY to the real terminal size once the socket is open;
+        // resizes sent while connecting are dropped and the session starts
+        // at the 80x24 default from the URL.
+        () => {
+          fitAddon.fit();
+          const conn = getTerminalConnection(tabId);
+          conn?.resize(terminal.cols, terminal.rows);
+        }
       );
     }
 
@@ -123,6 +131,18 @@ export function XTermInstance({
     const observer = new ResizeObserver(fitTerminal);
     observer.observe(resizeRef.current);
     return () => observer.disconnect();
+  }, [fitTerminal]);
+
+  // Re-fit once webfonts load: cell metrics measured against a fallback
+  // font produce a wrong grid until then.
+  useEffect(() => {
+    let cancelled = false;
+    void document.fonts?.ready.then(() => {
+      if (!cancelled) fitTerminal();
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [fitTerminal]);
 
   useEffect(() => {

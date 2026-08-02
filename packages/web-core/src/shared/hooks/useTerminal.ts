@@ -39,8 +39,9 @@ export interface TerminalContextType {
   createTerminalConnection: (
     tabId: string,
     endpoint: string,
-    onData: (data: string) => void,
-    onExit?: () => void
+    onData: (data: string | Uint8Array) => void,
+    onExit?: () => void,
+    onOpen?: () => void
   ) => {
     send: (data: string) => void;
     resize: (cols: number, rows: number) => void;
