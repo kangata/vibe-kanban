@@ -3,7 +3,7 @@ import type { ITheme } from '@xterm/xterm';
 /**
  * Convert HSL CSS variable value (e.g., "210 40% 98%") to hex color.
  */
-function hslToHex(hslValue: string): string {
+export function hslToHex(hslValue: string): string {
   const trimmed = hslValue.trim();
   if (!trimmed) return '#000000';
 
@@ -48,7 +48,7 @@ function hslToHex(hslValue: string): string {
 /**
  * Get the CSS variable value from the computed styles.
  */
-function getCssVariable(name: string): string {
+export function getCssVariable(name: string): string {
   return getComputedStyle(document.documentElement)
     .getPropertyValue(name)
     .trim();

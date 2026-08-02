@@ -11,7 +11,8 @@ import {
   SpinnerIcon,
 } from '@phosphor-icons/react';
 import type { WorkspaceFileEntry } from 'shared/types';
-import { getResolvedTheme, useTheme } from '@/shared/hooks/useTheme';
+import { useTheme } from '@/shared/hooks/useTheme';
+import { getEditorTheme } from '@/shared/lib/editorTheme';
 import { workspaceFilesApi } from '@/shared/lib/api';
 import { cn } from '@/shared/lib/utils';
 
@@ -143,7 +144,9 @@ export function WorkspaceFilesPanel({
   const [saving, setSaving] = useState(false);
 
   const isDirty = content !== savedContent;
-  const isDark = getResolvedTheme(theme) === 'dark';
+  // Rebuilt when the app theme changes: reads current CSS variables so the
+  // editor colors always match the surrounding UI.
+  const editorTheme = useMemo(() => getEditorTheme(), [theme]);
 
   useEffect(() => {
     setRootEntries(null);
@@ -263,7 +266,7 @@ export function WorkspaceFilesPanel({
             <CodeMirror
               value={content}
               height="100%"
-              theme={isDark ? 'dark' : 'light'}
+              theme={editorTheme}
               extensions={languageExtensions}
               onChange={setContent}
               style={{ height: '100%' }}
