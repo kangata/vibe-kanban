@@ -93,8 +93,12 @@ const RemoveRepoDialogImpl = create<RemoveRepoDialogProps>(({ repoName }) => {
   };
 
   return (
-    <Dialog open={modal.visible} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md">
+    <Dialog
+      className="sm:max-w-md"
+      open={modal.visible}
+      onOpenChange={handleOpenChange}
+    >
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>
             {t('settings:settings.repos.remove.dialogTitle', {
