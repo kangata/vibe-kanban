@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileTreeContainer } from './FileTreeContainer';
 import { ProcessListContainer } from './ProcessListContainer';
@@ -21,8 +21,10 @@ import {
 } from '@/shared/stores/useUiPreferencesStore';
 import {
   CollapsibleSectionHeader,
+  getPersistedSectionExpanded,
   type SectionAction,
 } from '@vibe/ui/components/CollapsibleSectionHeader';
+import { cn } from '@/shared/lib/utils';
 
 type SectionDef = {
   title: string;
@@ -215,28 +217,47 @@ export const RightSidebar = memo(function RightSidebar({
     t,
   ]);
 
+  // Live expansion state per section so expanded sections can flex-grow
+  // into the space collapsed ones leave free. Seeded from the same
+  // persisted value CollapsibleSectionHeader uses internally.
+  const [liveExpanded, setLiveExpanded] = useState<Record<string, boolean>>({});
+
   return (
     <div className="h-full border-l bg-secondary overflow-y-auto">
-      <div className="divide-y border-b">
+      <div className="flex min-h-full flex-col divide-y border-b">
         {sections
           .filter((section) => section.visible)
-          .map((section) => (
-            <div
-              key={section.persistKey}
-              className="max-h-[max(50vh,400px)] flex flex-col overflow-hidden"
-            >
-              <CollapsibleSectionHeader
-                title={section.title}
-                persistKey={section.persistKey}
-                defaultExpanded={section.expanded}
-                actions={section.actions}
+          .map((section) => {
+            const isExpanded =
+              liveExpanded[section.persistKey] ??
+              getPersistedSectionExpanded(section.persistKey, section.expanded);
+            return (
+              <div
+                key={section.persistKey}
+                className={cn(
+                  'flex flex-col overflow-hidden',
+                  isExpanded ? 'min-h-[240px] flex-1 basis-0' : 'shrink-0'
+                )}
               >
-                <div className="flex flex-1 border-t min-h-[200px] w-full overflow-auto">
-                  {section.content}
-                </div>
-              </CollapsibleSectionHeader>
-            </div>
-          ))}
+                <CollapsibleSectionHeader
+                  title={section.title}
+                  persistKey={section.persistKey}
+                  defaultExpanded={section.expanded}
+                  actions={section.actions}
+                  onExpandedChange={(expanded) =>
+                    setLiveExpanded((prev) => ({
+                      ...prev,
+                      [section.persistKey]: expanded,
+                    }))
+                  }
+                >
+                  <div className="flex flex-1 border-t min-h-0 w-full overflow-auto">
+                    {section.content}
+                  </div>
+                </CollapsibleSectionHeader>
+              </div>
+            );
+          })}
       </div>
     </div>
   );
