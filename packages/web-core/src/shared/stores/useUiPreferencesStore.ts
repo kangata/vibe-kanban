@@ -21,6 +21,7 @@ export type MobileTab =
   | 'changes'
   | 'logs'
   | 'preview'
+  | 'files'
   | 'git';
 
 export type MobileFontScale = 'default' | 'small' | 'smaller';

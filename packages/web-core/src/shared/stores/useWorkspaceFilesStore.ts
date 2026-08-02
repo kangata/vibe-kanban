@@ -5,6 +5,7 @@ interface WorkspaceFilesState {
   workspaceId: string | null;
   selectedPath: string | null;
   selectFile: (workspaceId: string, path: string) => void;
+  clearSelection: () => void;
 }
 
 /** Shares the file selected in the sidebar tree with the main editor panel. */
@@ -12,4 +13,5 @@ export const useWorkspaceFilesStore = create<WorkspaceFilesState>((set) => ({
   workspaceId: null,
   selectedPath: null,
   selectFile: (workspaceId, selectedPath) => set({ workspaceId, selectedPath }),
+  clearSelection: () => set({ selectedPath: null }),
 }));

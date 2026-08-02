@@ -32,6 +32,7 @@ import { ChangesPanelContainer } from './ChangesPanelContainer';
 import { CreateChatBoxContainer } from '@/shared/components/CreateChatBoxContainer';
 import { PreviewBrowserContainer } from './PreviewBrowserContainer';
 import { WorkspaceFilesPanel } from './WorkspaceFilesPanel';
+import { WorkspaceFilesMobile } from './WorkspaceFilesMobile';
 import { WorkspacesGuideDialog } from '@/shared/dialogs/shared/WorkspacesGuideDialog';
 import { useUserSystem } from '@/shared/hooks/useUserSystem';
 
@@ -289,6 +290,21 @@ export function WorkspacesLayout() {
                 <PreviewBrowserContainer
                   workspaceId={selectedWorkspace.id}
                   className=""
+                />
+              )}
+            </div>
+
+            {/* Files tab */}
+            <div
+              className={cn(
+                'flex-1 min-h-0 overflow-hidden',
+                mobileTab !== 'files' && 'hidden'
+              )}
+            >
+              {selectedWorkspace?.id && (
+                <WorkspaceFilesMobile
+                  key={selectedWorkspace.id}
+                  workspaceId={selectedWorkspace.id}
                 />
               )}
             </div>
