@@ -171,7 +171,6 @@ const FolderPickerDialogImpl = create<FolderPickerDialogProps>(
                   <Button
                     onClick={handleManualPathSubmit}
                     variant="outline"
-                    size="sm"
                     className="flex-shrink-0"
                   >
                     {t('folderPicker.go')}

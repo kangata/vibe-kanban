@@ -122,6 +122,7 @@ const CreateRepoDialogImpl = NiceModal.create<CreateRepoDialogProps>(
                   type="button"
                   variant="outline"
                   size="icon"
+                  className="h-9 w-9 shrink-0"
                   onClick={handleBrowseForPath}
                   disabled={isSubmitting || !onBrowseForPath}
                 >
