@@ -31,6 +31,7 @@ import { RightSidebar } from './RightSidebar';
 import { ChangesPanelContainer } from './ChangesPanelContainer';
 import { CreateChatBoxContainer } from '@/shared/components/CreateChatBoxContainer';
 import { PreviewBrowserContainer } from './PreviewBrowserContainer';
+import { WorkspaceFilesPanel } from './WorkspaceFilesPanel';
 import { WorkspacesGuideDialog } from '@/shared/dialogs/shared/WorkspacesGuideDialog';
 import { useUserSystem } from '@/shared/hooks/useUserSystem';
 
@@ -396,6 +397,13 @@ export function WorkspacesLayout() {
                     <PreviewBrowserContainer
                       workspaceId={selectedWorkspace.id}
                       className=""
+                    />
+                  )}
+                {rightMainPanelMode === RIGHT_MAIN_PANEL_MODES.FILES &&
+                  selectedWorkspace?.id && (
+                    <WorkspaceFilesPanel
+                      key={selectedWorkspace.id}
+                      workspaceId={selectedWorkspace.id}
                     />
                   )}
               </Panel>

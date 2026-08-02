@@ -154,6 +154,16 @@ export type UpdateScratch = { payload: ScratchPayload, };
 
 export type TaskStatus = "todo" | "inprogress" | "inreview" | "done" | "cancelled";
 
+export type WorkspaceFileEntry = { name: string, 
+/**
+ * Path relative to the workspace root.
+ */
+path: string, is_dir: boolean, };
+
+export type WorkspaceFileContent = { path: string, content: string, };
+
+export type WriteWorkspaceFile = { path: string, content: string, };
+
 export type Workspace = { id: string, task_id: string | null, container_ref: string | null, branch: string, setup_completed_at: string | null, created_at: string, updated_at: string, archived: boolean, pinned: boolean, name: string | null, worktree_deleted: boolean, status: TaskStatus, };
 
 export type WorkspaceWithStatus = { is_running: boolean, is_errored: boolean, id: string, task_id: string | null, container_ref: string | null, branch: string, setup_completed_at: string | null, created_at: string, updated_at: string, archived: boolean, pinned: boolean, name: string | null, worktree_deleted: boolean, status: TaskStatus, };

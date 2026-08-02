@@ -101,6 +101,8 @@ import {
   OpenRemoteEditorResponse,
   ProfileResponse,
   TaskStatus,
+  WorkspaceFileEntry,
+  WorkspaceFileContent,
 } from 'shared/types';
 import type { Project as RemoteProject } from 'shared/remote-types';
 import type { WorkspaceWithSession } from '@/shared/types/attempt';
@@ -394,6 +396,44 @@ export const sessionsApi = {
       body: JSON.stringify(data),
     });
     return handleApiResponse<Session>(response);
+  },
+};
+
+// Workspace file browser APIs
+export const workspaceFilesApi = {
+  list: async (
+    workspaceId: string,
+    path: string
+  ): Promise<WorkspaceFileEntry[]> => {
+    const response = await makeRequest(
+      `/api/workspaces/${workspaceId}/files/list?path=${encodeURIComponent(path)}`
+    );
+    return handleApiResponse<WorkspaceFileEntry[]>(response);
+  },
+
+  read: async (
+    workspaceId: string,
+    path: string
+  ): Promise<WorkspaceFileContent> => {
+    const response = await makeRequest(
+      `/api/workspaces/${workspaceId}/files/read?path=${encodeURIComponent(path)}`
+    );
+    return handleApiResponse<WorkspaceFileContent>(response);
+  },
+
+  write: async (
+    workspaceId: string,
+    path: string,
+    content: string
+  ): Promise<WorkspaceFileContent> => {
+    const response = await makeRequest(
+      `/api/workspaces/${workspaceId}/files/write`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({ path, content }),
+      }
+    );
+    return handleApiResponse<WorkspaceFileContent>(response);
   },
 };
 

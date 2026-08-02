@@ -31,6 +31,7 @@ import {
   ArrowsClockwiseIcon,
   CrosshairIcon,
   DesktopIcon,
+  FolderOpenIcon,
   PencilSimpleIcon,
   ArrowUpIcon,
   HighlighterIcon,
@@ -698,6 +699,29 @@ export const Actions = {
         .getState()
         .toggleRightMainPanelMode(
           RIGHT_MAIN_PANEL_MODES.PREVIEW,
+          ctx.currentWorkspaceId ?? undefined
+        );
+    },
+  },
+
+  ToggleFilesMode: {
+    id: 'toggle-files-mode',
+    label: 'Toggle Files Panel',
+    icon: FolderOpenIcon,
+    shortcut: 'V F',
+    requiresTarget: ActionTargetType.NONE,
+    isVisible: (ctx) => !ctx.isCreateMode && ctx.layoutMode === 'workspaces',
+    isActive: (ctx) => ctx.rightMainPanelMode === RIGHT_MAIN_PANEL_MODES.FILES,
+    isEnabled: (ctx) => !ctx.isCreateMode,
+    getLabel: (ctx) =>
+      ctx.rightMainPanelMode === RIGHT_MAIN_PANEL_MODES.FILES
+        ? 'Hide Files Panel'
+        : 'Show Files Panel',
+    execute: (ctx) => {
+      useUiPreferencesStore
+        .getState()
+        .toggleRightMainPanelMode(
+          RIGHT_MAIN_PANEL_MODES.FILES,
           ctx.currentWorkspaceId ?? undefined
         );
     },
