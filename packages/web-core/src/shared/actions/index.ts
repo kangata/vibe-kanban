@@ -1568,6 +1568,7 @@ export const NavbarActionGroups = {
     Actions.ToggleChangesMode,
     Actions.ToggleLogsMode,
     Actions.TogglePreviewMode,
+    Actions.ToggleFilesMode,
     Actions.ToggleRightSidebar,
     NavbarDivider,
     Actions.OpenCommandBar,
