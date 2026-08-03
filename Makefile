@@ -5,13 +5,14 @@
 #   make dev              run dev servers with LAN access (DEV_HOSTNAME=localhost)
 #   make update           git pull + install deps + full rebuild
 #   make check            type-check frontend + Rust workspace
+#   make clean-dev        free disk space (dev artifacts) keeping the release binary
 
 PORT ?= 3000
 HOST ?= 0.0.0.0
 DEV_HOSTNAME ?= localhost
 BIN := target/release/server
 
-.PHONY: install build build-frontend build-server run dev check update clean
+.PHONY: install build build-frontend build-server run dev check update clean clean-dev
 
 install:
 	pnpm i
@@ -45,6 +46,12 @@ update:
 	git pull
 	pnpm i
 	$(MAKE) build
+
+# Free the bulk of disk space (debug/dev artifacts) while KEEPING the
+# built release binary. Run this after dev sessions.
+clean-dev:
+	rm -rf target/debug
+	@df -h . | tail -1
 
 clean:
 	cargo clean
